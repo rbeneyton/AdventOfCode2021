@@ -69,6 +69,23 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", increased)
         },
+        2 => if part == 1 {
+            let (horizontal, depth) = input.lines()
+                .fold((0, 0), |(hor, depth), line| {
+                    let (mut inc_hor, mut inc_depth) = (0, 0);
+                    let words : Vec<_> = line.split_whitespace().collect();
+                    if words.len() == 2 {
+                        let step = words[1].parse::<i64>().unwrap();
+                        if words[0] == "forward" { inc_hor += step; }
+                        if words[0] == "down" { inc_depth += step; }
+                        if words[0] == "up" { inc_depth -= step; }
+                    }
+                    (hor + inc_hor, depth + inc_depth) });
+
+            format!("{}", horizontal * depth)
+        } else {
+            String::from("")
+        },
         _ => String::from(""),
     }
 }
