@@ -128,7 +128,63 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", most_common * second_common)
         } else {
-            String::from("")
+            const N : usize = 12;
+
+            let get_rating = |input : &str, most : bool| {
+                let n = input.lines().count();
+                let mut skip = Vec::new();
+                skip.resize(n, false);
+                for i in 0..N {
+                    let mut valid_n = 0;
+                    let mut valid = "invalid";
+
+                    let (acc0, acc1) = input.lines().enumerate()
+                        .filter_map(|(idx, line)| if skip[idx] { None } else { Some(line) })
+                        .fold((0, 0), |(mut acc0, mut acc1), line| {
+                            let c = line.chars().skip(i).next().unwrap();
+                            if c == '0' { acc0 += 1; }
+                            if c == '1' { acc1 += 1; }
+                            (acc0, acc1) });
+                    let most_common = if acc1 >= acc0 { '1' } else { '0' };
+                    let least_common = if acc1 < acc0 { '1' } else { '0' };
+                    let common = if most { most_common } else { least_common };
+
+                    for (idx, line) in input.lines().enumerate() {
+                        if skip[idx] { continue; }
+                        let c = line.chars().skip(i).next().unwrap();
+                        if c != common {
+                            skip[idx] = true;
+                            continue;
+                        }
+                        valid_n += 1;
+                        valid = line;
+                    }
+                    if dbg!(valid_n) == 1 {
+                        return valid.to_string();
+                    }
+                }
+                unreachable!();
+            };
+            let oxygen = get_rating(&input, true);
+            println!("oxygen: {}", oxygen);
+            let co2 = get_rating(&input, false);
+            println!("co2: {}", co2);
+
+            let to_number = |input : &str| {
+                let mut res = 0;
+                let mut c = input.chars();
+                for i in 0..N {
+                    if c.next().unwrap() == '1' {
+                        let abs_idx = N - 1 - i;
+                        res += 1 << abs_idx;
+                    }
+                }
+                res
+            };
+            let oxygen = to_number(&oxygen);
+            let co2 = to_number(&co2);
+
+            format!("{}", oxygen * co2)
         },
         _ => String::from(""),
     }
