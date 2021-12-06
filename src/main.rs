@@ -1,5 +1,6 @@
 use curl::easy::Easy;
 use clap::Parser;
+use itertools::Itertools;
 
 pub type Day = i8;
 
@@ -9,6 +10,9 @@ pub struct Options {
     /// day
     #[clap(short, long, default_value = "1")]
     day: Day,
+    /// part
+    #[clap(short, long, default_value = "1")]
+    part: u8,
     /// session cookie
     #[clap(short, long, default_value = "unset")]
     session: String,
@@ -35,11 +39,12 @@ fn get_data(day: Day, session: String) -> String
     String::from_utf8_lossy(&res).to_string()
 }
 
-fn solve(day: Day, input: String) -> String {
+fn solve(day: Day, part: u8, input: String) -> String {
     match day {
-        1 => {
+        1 => if part == 1 {
             let mut res = 0;
             let mut prev = None;
+
             for line in input.lines() {
                 if let Ok(value) = line.parse::<i64>() {
                     if let Some(prev) = prev {
@@ -50,12 +55,22 @@ fn solve(day: Day, input: String) -> String {
                     prev = Some(value);
                 }
             }
-            return format!("{}", res);
-        },
-        _ => {},
-    }
+            format!("{}", res)
+        } else {
+            let (increased, _) = input.lines()
+                .filter_map(|x| x.parse::<i64>().ok())
+                .tuple_windows()
+                .map(|(a, b, c)| a + b + c)
+                .fold((0, None), |(acc, prev), sum| {
+                    let inc = if let Some(prev) = prev {
+                        if sum > prev { 1 } else { 0 }
+                    } else { 0 };
+                    (acc + inc, Some(sum)) });
 
-    String::from("")
+            format!("{}", increased)
+        },
+        _ => String::from(""),
+    }
 }
 
 fn main() {
@@ -64,6 +79,6 @@ fn main() {
     let data = get_data(options.day, options.session);
     println!("day {} input: {}", options.day, data);
 
-    let res = solve(options.day, data);
-    println!("day {} solve: {}", options.day, res)
+    let res = solve(options.day, options.part, data);
+    println!("day {} part {} solve: {}", options.day, options.part, res)
 }
