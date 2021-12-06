@@ -98,6 +98,38 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", horizontal * depth)
         },
+        3 => if part == 1 {
+            const N : usize = 12;
+            type Acc = [usize; N];
+
+            let (acc0, acc1) = input.lines()
+                .fold((Acc::default(), Acc::default()), |(acc0, acc1), line| {
+                    let mut acc0 = acc0;
+                    let mut acc1 = acc1;
+                    for (idx, c) in line.chars().enumerate() {
+                        assert!(idx < N);
+                        if c == '0' { acc0[idx] += 1; }
+                        if c == '1' { acc1[idx] += 1; }
+                    }
+                    (acc0, acc1) });
+            for i in 0..N {
+                assert_eq!(acc0[i] + acc1[i], acc0[0] + acc1[0]);
+            }
+            let (most_common, second_common) = (0..N)
+                .fold((0, 0), |(most, second), i| {
+                    let abs_idx = N - 1 - i;
+                    let incr = 1 << abs_idx;
+                    if acc1[i] > acc0[i] {
+                        (most + incr, second)
+                    } else {
+                        (most, second + incr)
+                    }});
+            assert_eq!(most_common + second_common, (1 << N) - 1);
+
+            format!("{}", most_common * second_common)
+        } else {
+            String::from("")
+        },
         _ => String::from(""),
     }
 }
