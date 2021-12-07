@@ -497,6 +497,25 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", sum)
         },
+        7 => if part == 1 {
+            let positions : Vec<_> = input.lines().next().unwrap()
+                .split(',')
+                .map(|x| x.parse::<i32>().unwrap())
+                .collect();
+
+            // TODO sort + bisect
+            let start : i32 = *positions.iter().min().unwrap();
+            let stop : i32 = *positions.iter().max().unwrap();
+            let steps : i32 = (start..=stop)
+                .map(|x| positions.iter().map(|p| (p - x).abs()).sum())
+                .min()
+                .unwrap();
+
+            format!("{}", steps)
+        } else {
+
+            format!("{}", 0)
+        },
         _ => String::from(""),
     }
 }
