@@ -513,8 +513,24 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", steps)
         } else {
+            let positions : Vec<_> = input.lines().next().unwrap()
+                .split(',')
+                .map(|x| x.parse::<i32>().unwrap())
+                .collect();
 
-            format!("{}", 0)
+            // TODO sort + bisect
+            let start : i32 = *positions.iter().min().unwrap();
+            let stop : i32 = *positions.iter().max().unwrap();
+            let steps : i32 = (start..=stop)
+                .map(|x| positions.iter()
+                    .map(|p| {
+                        let step = (p - x).abs();
+                        step * (step + 1) / 2 })
+                    .sum())
+                .min()
+                .unwrap();
+
+            format!("{}", steps)
         },
         _ => String::from(""),
     }
