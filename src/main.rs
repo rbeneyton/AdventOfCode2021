@@ -532,6 +532,37 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", steps)
         },
+        8 => if part == 1 {
+            let sum : usize = input.lines().map(|line| {
+                let (digits, displayed) = line.split('|').collect_tuple().unwrap();
+                [1, 4, 7, 8].iter().map(|digit| {
+                    let n_wires = match digit {
+                        1 => 2,
+                        4 => 4,
+                        7 => 3,
+                        8 => 7,
+                        _ => panic!(),
+                    };
+                    let wires = digits.split_whitespace()
+                        .find(|x| x.len() == n_wires)
+                        .unwrap()
+                        .chars()
+                        .sorted()
+                        .collect::<String>();
+                    let found : usize = displayed.split_whitespace()
+                        .filter(|x| x.len() == n_wires)
+                        .filter(|x| x.chars().sorted().collect::<String>() == wires)
+                        .count();
+                    found
+                })
+                .sum::<usize>()
+            })
+            .sum();
+
+            format!("{}", sum)
+        } else {
+            String::from("")
+        },
         _ => String::from(""),
     }
 }
