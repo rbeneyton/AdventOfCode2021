@@ -683,6 +683,42 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", sum)
         },
+        9 => if part == 1 {
+            let w = input.lines().next().unwrap().chars().count();
+            let h = input.lines().count();
+
+            let mut grid = Vec::new();
+            grid.resize(w * h, 0u8);
+            let idx_of = |x, y| x + w * y;
+
+            let mut idx = 0;
+            for line in input.lines() {
+                for c in line.chars() {
+                    grid[idx] = c.to_digit(10).unwrap() as u8;
+                    idx += 1;
+                }
+            }
+            assert_eq!(idx, w * h);
+            let grid = grid;
+
+            let mut risks : u64 = 0;
+            for row in 0..h {
+                for col in 0..w {
+                    let v = grid[idx_of(col, row)];
+                    // first memory locality checks, so left & right
+                    if col > 0 && grid[idx_of(col - 1, row)] <= v { continue; }
+                    if col < w - 1 && grid[idx_of(col + 1, row)] <= v { continue; }
+                    // then far away, so up & down
+                    if row > 0 && grid[idx_of(col, row - 1)] <= v { continue; }
+                    if row < h - 1 && grid[idx_of(col, row + 1)] <= v { continue; }
+                    risks += (v + 1) as u64;
+                }
+            }
+
+            format!("{}", risks)
+        } else {
+            String::from("")
+        },
         _ => String::from(""),
     }
 }
