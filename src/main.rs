@@ -860,7 +860,45 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", score)
         } else {
-            String::from("")
+            let mut stack = Vec::new();
+            let mut scores = Vec::new();
+            'line2: for line in input.lines() {
+                stack.clear();
+                'scan2: for c in line.chars() {
+                    for (open, close) in [('(', ')'), ('[', ']'), ('{', '}'), ('<', '>')] {
+                        if c == open {
+                            stack.push(c);
+                            continue 'scan2;
+                        }
+                        if c == close {
+                            let last = stack.pop().expect("empty stack");
+                            if last == open {
+                                continue 'scan2;
+                            } else {
+                                continue 'line2;
+                            }
+                        }
+                    }
+                    panic!("invalid token {}", c);
+                }
+                let mut line_score = 0u64;
+                for c in stack.iter().rev() {
+                    line_score *= 5;
+                    line_score += match c {
+                        '(' => 1,
+                        '[' => 2,
+                        '{' => 3,
+                        '<' => 4,
+                        _ => panic!(""),
+                    };
+                }
+                scores.push(line_score);
+            }
+            let n = scores.len();
+            assert_eq!(n % 2, 1);
+            scores.sort();
+
+            format!("{}", scores[n / 2])
         }
         _ => String::from(""),
     }
