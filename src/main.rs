@@ -833,6 +833,35 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", product_largest)
         },
+        10 => if part == 1 {
+            let mut stack = Vec::new();
+            let mut score = 0;
+            'line: for line in input.lines() {
+                stack.clear();
+                'scan: for c in line.chars() {
+                    for (open, close, point) in [('(', ')', 3), ('[', ']', 57), ('{', '}', 1197), ('<', '>', 25137)] {
+                        if c == open {
+                            stack.push(c);
+                            continue 'scan;
+                        }
+                        if c == close {
+                            let last = stack.pop().expect("empty stack");
+                            if last == open {
+                                continue 'scan;
+                            } else {
+                                score += point;
+                                continue 'line;
+                            }
+                        }
+                    }
+                    panic!("invalid token {}", c);
+                }
+            }
+
+            format!("{}", score)
+        } else {
+            String::from("")
+        }
         _ => String::from(""),
     }
 }
