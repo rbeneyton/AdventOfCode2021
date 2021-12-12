@@ -4,6 +4,7 @@ use itertools::Itertools;
 use std::cmp;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fs::{read_to_string, write};
 
 pub type Day = i8;
 
@@ -22,6 +23,18 @@ pub struct Options {
 }
 
 fn get_data(day: Day, session: String) -> String
+{
+    let file = format!("data/{}.input", day);
+    match read_to_string(&file) {
+        Ok(data) => data,
+        Err(..) => {
+            let data = get_data_server(day, session);
+            write(&file, &data).expect("cannot write onto file");
+            data
+        }
+    }
+}
+fn get_data_server(day: Day, session: String) -> String
 {
     let mut res = Vec::new();
     let mut easy = Easy::new();
