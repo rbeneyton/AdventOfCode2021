@@ -1061,7 +1061,48 @@ fn solve(day: Day, part: u8, input: String) -> String {
 
             format!("{}", paths.len())
         } else {
-            String::from("")
+            let mut nodes = HashMap::new();
+            for line in input.lines() {
+                let (from, to) = line.split('-').collect_tuple().unwrap();
+                let entry = nodes.entry(from).or_insert(HashSet::new());
+                entry.insert(to);
+                let entry = nodes.entry(to).or_insert(HashSet::new());
+                entry.insert(from);
+            }
+
+            fn upper<'a>(node : &'a str) -> bool { node.chars().all(char::is_uppercase) }
+            fn count_dup_small<'a>(path: &Vec<&'a str>) -> usize {
+                let mut path = path.iter()
+                    .filter(|x| x.chars().all(char::is_lowercase))
+                    .collect::<Vec<_>>();
+                path.sort();
+                path.iter()
+                    .tuple_windows()
+                    .filter(|(i, next)| i == next)
+                    .count()
+            }
+            fn visit<'a>(nodes: &HashMap<&'a str, HashSet<&'a str>>,
+                         from: &'a str,
+                         path: &Vec<&'a str>,
+                         paths: &mut Vec<Vec<&'a str>>)
+            {
+                for next in nodes.get(from).unwrap() {
+                    if *next == "start" { continue; }
+                    let mut new = path.clone();
+                    new.push(next);
+                    if !upper(next) && count_dup_small(&new) > 1 { continue; }
+                    if *next == "end" {
+                        paths.push(new);
+                    } else {
+                        visit(nodes, next, &new, paths);
+                    }
+                }
+            }
+
+            let mut paths = Vec::new();
+            visit(&nodes, "start", &vec!["start",], &mut paths);
+
+            format!("{}", paths.len())
         }
         _ => String::from(""),
     }
