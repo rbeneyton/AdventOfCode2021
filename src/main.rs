@@ -5,6 +5,7 @@ use std::cmp;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::{read_to_string, write};
+use std::time::Instant;
 
 pub type Day = i8;
 
@@ -20,9 +21,12 @@ pub struct Options {
     /// session cookie
     #[clap(short, long, default_value = "unset")]
     session: String,
+    /// bench all until the given day
+    #[clap(short, long)]
+    bench: bool,
 }
 
-fn get_data(day: Day, session: String) -> String
+fn get_data(day: Day, session: &String) -> String
 {
     let file = format!("data/{}.input", day);
     match read_to_string(&file) {
@@ -34,7 +38,7 @@ fn get_data(day: Day, session: String) -> String
         }
     }
 }
-fn get_data_server(day: Day, session: String) -> String
+fn get_data_server(day: Day, session: &String) -> String
 {
     let mut res = Vec::new();
     let mut easy = Easy::new();
@@ -55,7 +59,7 @@ fn get_data_server(day: Day, session: String) -> String
     String::from_utf8_lossy(&res).to_string()
 }
 
-fn solve(day: Day, part: u8, input: String) -> String {
+fn solve(day: Day, part: u8, input: &String) -> String {
     match day {
         1 => if part == 1 {
             let mut res = 0;
@@ -175,16 +179,16 @@ fn solve(day: Day, part: u8, input: String) -> String {
                         valid_n += 1;
                         valid = line;
                     }
-                    if dbg!(valid_n) == 1 {
+                    if valid_n == 1 {
                         return valid.to_string();
                     }
                 }
                 unreachable!();
             };
             let oxygen = get_rating(&input, true);
-            println!("oxygen: {}", oxygen);
+            // println!("oxygen: {}", oxygen);
             let co2 = get_rating(&input, false);
-            println!("co2: {}", co2);
+            // println!("co2: {}", co2);
 
             let to_number = |input : &str| {
                 let mut res = 0;
@@ -351,7 +355,7 @@ fn solve(day: Day, part: u8, input: String) -> String {
                 .unwrap()
                 .unwrap() + 1;
 
-            println!("sz: {}", sz);
+            // println!("sz: {}", sz);
 
             let mut grid = Vec::new();
             grid.resize(sz * sz, 0u8);
@@ -401,7 +405,7 @@ fn solve(day: Day, part: u8, input: String) -> String {
                 .unwrap()
                 .unwrap() + 1;
 
-            println!("sz: {}", sz);
+            // println!("sz: {}", sz);
 
             let mut grid = Vec::new();
             grid.resize(sz * sz, 0u16);
@@ -658,9 +662,6 @@ fn solve(day: Day, part: u8, input: String) -> String {
                         && num.chars().contains(&d) && num.chars().contains(&f)
                         && num.chars().contains(&g))
                     .unwrap();
-                for num in &wires_in_digit[&5] {
-                    println!("num: {}", num);
-                }
                 let num2 = &wires_in_digit[&5].iter()
                     .find(|num| num.chars().contains(&a) && num.chars().contains(&c)
                         && num.chars().contains(&d) && num.chars().contains(&e)
@@ -818,12 +819,12 @@ fn solve(day: Day, part: u8, input: String) -> String {
                     for col in 0..w {
                         let v = grid[idx_of(col, row)];
                         if v == 255 {
-                            print!(" XXX");
+                            // print!(" XXX");
                         } else {
-                            print!(" {:3}", v);
+                            // print!(" {:3}", v);
                         }
                     }
-                    println!("");
+                    // println!("");
                 }
             }
 
@@ -1124,9 +1125,19 @@ fn solve(day: Day, part: u8, input: String) -> String {
 fn main() {
     let options = Options::parse();
 
-    let data = get_data(options.day, options.session);
-    println!("day {} input: {}", options.day, data);
-
-    let res = solve(options.day, options.part, data);
-    println!("day {} part {} solve: {}", options.day, options.part, res)
+    if options.bench {
+        for day in 1..=options.day {
+            let data = get_data(day, &options.session);
+            for part in [1, 2] {
+                let start = Instant::now();
+                let _res = solve(day, part, &data);
+                let elapsed = start.elapsed();
+                println!("day {:2} part {} elapsed: {}µs", day, part, elapsed.as_micros());
+            }
+        }
+    } else {
+        let data = get_data(options.day, &options.session);
+        let res = solve(options.day, options.part, &data);
+        println!("day {} part {} solve: {}", options.day, options.part, res)
+    }
 }
