@@ -1373,6 +1373,57 @@ fn solve(day: Day, part: u8, input: &String) -> String {
             let res = keys_counts.iter().max().unwrap() - keys_counts.iter().min().unwrap();
             format!("{}", res / 2)
         },
+        15 => if part == 1 {
+            let w = input.lines().next().unwrap().chars().count();
+            let h = input.lines().count();
+
+            assert_eq!(w, h);
+            let n = h;
+
+            let mut grid = Vec::new();
+            let sz = n * n;
+            grid.resize(sz, 0u32);
+            let idx_of = |(x, y)| x + w * y;
+
+            let mut idx = 0;
+            for line in input.lines() {
+                for c in line.chars() {
+                    let v = c.to_digit(10).unwrap() as u32;
+                    assert!(v > 0);
+                    grid[idx] = v;
+                    idx += 1;
+                }
+            }
+            assert_eq!(idx, sz);
+
+            let mut dist = Vec::new();
+            dist.resize(sz, 0);
+            let aim = (n - 1, n - 1);
+            dist[idx_of(aim)] = grid[idx_of(aim)];
+            'dist: loop {
+                for row in (0..n).rev() {
+                    if let Some(col) = (0..n).rev().find(|x| dist[idx_of((*x, row))] == 0) {
+                        dist[idx_of((col, row))] = grid[idx_of((col, row))] +
+                            if col == n - 1 {
+                                dist[idx_of((col, row + 1))]
+                            } else
+                            if row == n - 1 {
+                                dist[idx_of((col + 1, row))]
+                            } else {
+                                cmp::min(dist[idx_of((col, row + 1))],
+                                         dist[idx_of((col + 1, row))])
+                            };
+                        if col == n - 1 { break; }
+                    } else
+                    if row == 0 { break 'dist; }
+                }
+            }
+
+            let res = dist[idx_of((0, 0))] - grid[idx_of((0, 0))];
+            format!("{}", res)
+        } else {
+            String::from("")
+        },
         _ => String::from(""),
     }
 }
