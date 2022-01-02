@@ -4013,13 +4013,13 @@ fn main() {
     let options = Options::parse();
 
     if options.bench {
-        for day in 1..=options.day {
+        for day in (1..=25).filter(|d| ![17, 22].contains(d)) {
             let data = get_data(day, &options.session);
-            for part in [1, 2] {
+            for part in [/*1,*/ 2] {
                 let start = Instant::now();
                 let _res = solve(day, part, &data);
                 let elapsed = start.elapsed();
-                println!("day {:2} part {} elapsed: {}µs", day, part, elapsed.as_micros());
+                println!("day {:2} part {} elapsed: {:10}µs", day, part, elapsed.as_micros());
             }
         }
     } else {
